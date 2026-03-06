@@ -12,5 +12,6 @@ const usuarioController = {
         const {data, error} = await supabase
         .from('usuarios')
         .insert ([{ email, senha}]);
+        
     }
     }
