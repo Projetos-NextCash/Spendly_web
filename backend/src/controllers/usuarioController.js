@@ -2,24 +2,23 @@ const supabase = require("../config/supabase");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+
 const cadastrarUsuario = async (req, res) => {
   try {
     const { nome, email, senha } = req.body;
 
     if (!email || !senha || !nome) {
       return res.status(400).json({
-        error:
-          "Por favor preencha o que esta sendo solicitado nos respectivos campos",
+        error: "Por favor preencha todos os campos",
       });
     }
 
-    const usuarioExistente = await supabase
+    const { data: usuarioExistente } = await supabase
       .from("usuarios")
       .select("*")
       .eq("email", email)
-      .single();
 
-    if (usuarioExistente) {
+    if (usuarioExistente.length > 0) {
       return res.status(400).json({ error: "Usuário já cadastrado" });
     }
 
@@ -30,13 +29,17 @@ const cadastrarUsuario = async (req, res) => {
       .insert([{ nome, email, senha: senhacriptografada }]);
 
     if (error) {
-      return res.status(500).json({ error: "Erro ao cadastrar usuário" });
+      console.error("Erro SUpabase:",error);
+      return res.status(500).json({ error: error.message });
     }
 
-    return res
-      .status(201)
-      .json({ message: "Usuário cadastrado com sucesso", usuario: data });
+    return res.status(201).json({
+      message: "Usuário cadastrado com sucesso",
+      usuario: data,
+    });
+
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: "Erro interno no servidor" });
   }
 };

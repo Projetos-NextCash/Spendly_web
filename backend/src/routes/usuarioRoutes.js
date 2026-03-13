@@ -8,10 +8,10 @@ const {
   deletarUsuario,
 } = require("../controllers/usuarioController");
 
-router.post("/cadastrar", cadastrarUsuario);
+router.post("/", cadastrarUsuario);
 router.post("/login", loginUsuario);
-router.put("/atualizar/:id", atualizarUsuario);
+router.put("/:id", atualizarUsuario);
 router.get("/:id", buscarUsuarioporId);
-router.delete("/deletar/:id", deletarUsuario);
+router.delete("/:id", deletarUsuario);
 
 module.exports = router;
