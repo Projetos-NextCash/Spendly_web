@@ -1,5 +1,5 @@
 import React from "react";
-import Voltar from "../components/Btnvoltar";
+import Voltar from "/src/components/Btnvoltar";
 import api from "/service/api";
 import { useState } from "react";
 

@@ -1,17 +1,17 @@
-import React from 'react'
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import Voltar from '../components/Btnvoltar'
-//import api from "../service/api";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+//import "/styles/login.css";
+//import "/styles/components.css";
+import Btnvoltar from "/src/Components/Btnvoltar";
+import api from "/service/api";
 
 const Login = () => {
-
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const navigate = useNavigate();
 
-  const enviodados = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !senha) {
@@ -20,11 +20,11 @@ const Login = () => {
     }
 
     try {
-      //const res = await api.post("", { email, senha });
+      const res = await api.post("/api/usuarios/login", { email, senha });
 
-      localStorage.setItem("token", /*res.data.token*/);
-      localStorage.setItem("usuario", JSON.stringify(/*res.data.usuario*/));
-      localStorage.setItem("usuarioId", /*res.data.usuario.id*/);
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("usuario", JSON.stringify(res.data.usuario));
+      localStorage.setItem("usuarioId", res.data.usuario.id);
 
       alert("Login realizado com sucesso!");
       navigate("/");
@@ -34,25 +34,48 @@ const Login = () => {
   };
 
   return (
-    <div className='tela-login'>
-        <Voltar />
-        <form onSubmit={enviodados} className='login-form'>
-          <h3>Faça seu login</h3>
-        <label htmlFor="Email" id='email'>Email</label>
-        <input type="email" placeholder='Informe seu e-mail' value={email} onChange={(e) => setEmail(e.target.value)}/>
-        <br />
-        <br />
-        <label htmlFor="Senha" id='senha'>Senha</label>
-        <input type={mostrarSenha ? "text" : "password"} placeholder='Informe sua senha' value={senha} onChange={(e) => setSenha(e.target.value)}/>
-        <button type='button' className='btn-show' onClick={() => setMostrarSenha(!mostrarSenha)}>{mostrarSenha ? "Ocultar" : "Mostrar"}</button>
-        <br />
-        <br />
-        <a href="/cadastro"></a>
-        </form>
-        <p>Não tem conta?</p>
-        <button className="btn-secundario" onClick={() => navigate("/cadastro")}>Cadastre-se</button> 
-    </div>
-  )
-}
+    <div className="tela-login">
+      <form onSubmit={handleSubmit} className="login-box">
+        <h3>Faça seu login</h3>
 
-export default Login
+        <label>E-mail</label>
+        <input
+          type="email"
+          placeholder="Digite seu e-mail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="login-input"
+        />
+
+        <label>Senha</label>
+        <div className="senha-wrapper">
+          <input
+            type={mostrarSenha ? "text" : "password"}
+            placeholder="Digite sua senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            className="login-input"
+          />
+          <button
+            type="button"
+            className="btn-mostrar"
+            onClick={() => setMostrarSenha(!mostrarSenha)}
+          >
+            {mostrarSenha ? "Ocultar" : "Mostrar"}
+          </button>
+        </div>
+
+        <button type="submit" className="btn-entrar">Entrar</button>
+      </form>
+      <div className="btns">
+        <p>Não tem conta?</p>
+      <button className="btn-secundario" onClick={() => navigate("/cadastro")}>
+        Cadastrar-se
+      </button>
+      <Btnvoltar estilo= "voltar-btn" />
+      </div>
+    </div>
+  );
+};
+
+export default Login;

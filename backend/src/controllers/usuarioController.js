@@ -50,35 +50,46 @@ const loginUsuario = async (req, res) => {
 
     if (!email || !senha) {
       return res.status(400).json({
-        error: "Por favor informe seu e-mail e senha para realizar o login",
+        error: "Informe email e senha",
       });
     }
 
-    const usuario = await supabase
+    const { data: usuario, error } = await supabase
       .from("usuarios")
       .select("*")
       .eq("email", email)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      console.log(error);
+      return res.status(500).json({ error: "Erro ao buscar usuário" });
+    }
 
     if (!usuario) {
-      return res.status(400).json({ error: "Usuário não encontrado" });
+      return res.status(401).json({ error: "Email ou senha incorretos" });
     }
 
     const senhaValida = await bcrypt.compare(senha, usuario.senha);
 
     if (!senhaValida) {
-      return res.status(400).json({ error: "Senha incorreta" });
+      return res.status(401).json({ error: "Email ou senha incorretos" });
     }
 
+    delete usuario.senha;
+
     const token = jwt.sign(
-      { id: usuario.id, email: usuario.email },
+      { id: usuario.id },
       process.env.JWT_SECRET,
-      { expiresIn: "2h" },
+      { expiresIn: "2h" }
     );
 
-    return res.json({ token });
-  } catch (error) {
-    return res.status(500).json({ error: "Erro interno no servidor" });
+    delete usuario.senha;
+
+    res.json({ token, usuario });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Erro interno" });
   }
 };
 
