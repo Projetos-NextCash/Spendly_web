@@ -7,7 +7,6 @@ const Btnlogout = ({ className }) => {
   const handleLogout = () => {
     localStorage.removeItem("usuario");
     localStorage.removeItem("usuarioId");
-    localStorage.removeItem("token");
 
     navigate("/login");
   };

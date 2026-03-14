@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import Navbar from "/src/components/Navbar";
 import Voltar from "/src/components/Btnvoltar.jsx";
-//import api from "../service/api";
 
 
 const Homepag = () => {
