@@ -4,6 +4,7 @@ import Voltar from "/src/components/Btnvoltar.jsx";
 import Logout from "/src/components/Btnlogout.jsx";
 import api from "/service/api";
 import DadosPerfil from "/src/components/Attuser";
+import Apagar from "/src/components/Deluser";
 
 const Paguser = () => {
   const [mostrarDados, setMostrarDados] = useState(false);
@@ -75,6 +76,7 @@ const Paguser = () => {
             </button>
 
             <Logout className="logout-btn" />
+            <Apagar />
           </div>
         ) : (
           <p>Carregando informações...</p>
