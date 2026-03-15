@@ -136,6 +136,41 @@ const atualizarUsuario = async (req, res) => {
   }
 };
 
+const recuperarSenha = async (req, res) => {
+  try {
+
+    const { email, senha } = req.body;
+
+    const { data: usuario, error } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("email", email)
+      .single();
+
+    if (!usuario) {
+      return res.status(404).json({ error: "Email não encontrado" });
+    }
+
+    const senhaHash = await bcrypt.hash(senha, 10);
+
+    const { error: updateError } = await supabase
+      .from("usuarios")
+      .update({ senha: senhaHash })
+      .eq("email", email);
+
+    if (updateError) {
+      return res.status(500).json({ error: "Erro ao atualizar senha" });
+    }
+
+    return res.json({
+      message: "Senha atualizada com sucesso"
+    });
+
+  } catch (error) {
+    return res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
 const buscarUsuarioporId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -184,4 +219,4 @@ const deletarUsuario = async (req, res) => {
   }
 };
 
-module.exports = { cadastrarUsuario, loginUsuario, atualizarUsuario, buscarUsuarioporId, deletarUsuario };
+module.exports = { cadastrarUsuario, loginUsuario, atualizarUsuario, buscarUsuarioporId, deletarUsuario, recuperarSenha };

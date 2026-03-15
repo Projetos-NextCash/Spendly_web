@@ -68,6 +68,8 @@ const Login = () => {
         <button type="submit" className="btn-entrar">Entrar</button>
       </form>
       <div className="btns">
+        <p>Esqueçeu sua senha?</p>
+        <button className="btn-secundario" onClick={() => navigate("/recuperar")}>Recuperar</button>
         <p>Não tem conta?</p>
       <button className="btn-secundario" onClick={() => navigate("/cadastro")}>
         Cadastrar-se

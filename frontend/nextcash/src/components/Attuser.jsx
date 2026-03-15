@@ -2,9 +2,6 @@ import React, {useState} from 'react'
 import api from '/service/api'
 
 const Attuser = ({ usuario, onClose, onAtualizado }) => {
-
-    
-
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
  const [form, setForm] = useState({

@@ -14,11 +14,18 @@ const Paguser = () => {
     return usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
   });
 
+  if (!usuario) {
+    return (
+      <div> 
+        <Navbar />
+        <p>Usuário não encontrado.</p>
+      </div>
+    );
+  }
+
   const getAvatar = () => {
     if (!usuario || !usuario.nome) return "";
-
     const partes = usuario.nome.trim().split(" ");
-
     if (partes.length === 1) {
       return partes[0][0].toUpperCase();
     }
