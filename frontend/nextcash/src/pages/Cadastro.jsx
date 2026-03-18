@@ -29,7 +29,7 @@ const Cadastro = () => {
   const avaliarForca = (senha) => {
     let pontos = 0;
 
-    if (senha.length >= 8) pontos++;
+    if (senha.length >= 6) pontos++;
     if (/[a-z]/.test(senha)) pontos++;
     if (/[A-Z]/.test(senha)) pontos++;
     if (/\d/.test(senha)) pontos++;

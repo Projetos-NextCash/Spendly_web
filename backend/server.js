@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use('/api/usuarios', require('./src/routes/usuarioRoutes'));
-//app.use('/api/transacao', require('./src/routes/transacaoRoutes'));
+app.use('/api/transacao', require('./src/routes/transacaoRoutes'));
 //app.use('/api/categoria', require('./src/routes/categoriaRoutes'));
 //app.use('/api/objFinan', require('./src/routes/objFinanRoutes'));
 app.get('/api/health', (req, res) => {

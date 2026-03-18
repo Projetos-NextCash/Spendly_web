@@ -24,6 +24,7 @@ const Recpass = () => {
       });
 
       alert("Senha atualizada com sucesso!");
+    // eslint-disable-next-line no-unused-vars
     } catch (error) {
       alert("Email não encontrado");
     }
