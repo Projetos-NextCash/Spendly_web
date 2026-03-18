@@ -51,4 +51,50 @@ if (transacaoExistente && transacaoExistente.length > 0) {
   }
 };
 
-module.exports = { criarTransacao };
+const listarTransacoes = async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("transacao")
+      .select("*")
+      .eq("id_usuario", req.params.id_usuario);
+
+    if (error) {
+      console.error("Erro ao listar transações:", error);
+      return res.status(500).json({ error: "Erro ao listar transações" });
+    }
+
+    return res.status(200).json({
+      message: "Transações listadas com sucesso",
+      transacoes: data,
+    });
+  } catch (error) {
+    console.error("Erro inesperado:", error);
+    return res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
+const apagarTransacao = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { data, error } = await supabase
+      .from("transacao")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("Erro ao apagar transação:", error);
+      return res.status(500).json({ error: "Erro ao apagar transação" });
+    }
+
+    return res.status(200).json({
+      message: "Transação apagada com sucesso",
+      transacao: data,
+    });
+  } catch (error) {
+    console.error("Erro inesperado:", error);
+    return res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
+module.exports = { criarTransacao, apagarTransacao, listarTransacoes };

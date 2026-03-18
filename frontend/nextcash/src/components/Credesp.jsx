@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import api from "/service/api";
 
 
-const Credesp = () => {
+const Credesp = (props) => {
   const [mostrarNovaCategoria, setMostrarNovaCategoria] = useState(false);
   
   const gerardata = () => {
@@ -40,6 +40,7 @@ const Credesp = () => {
         id_usuario,
       });
 
+      props.atualizarLista();
       alert(res.data.mensagem || "Transação cadastrada com sucesso!");
     } catch (err) {
       console.error(err);
