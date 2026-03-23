@@ -2,52 +2,105 @@ const supabase = require("../config/supabase");
 
 const criarTransacao = async (req, res) => {
   try {
-    const { descricao, valor, categoria, tipo, data_transacao, id_usuario } = req.body;
+    const {
+      descricao,
+      valor,
+      categoria,
+      tipo,
+      data_transacao,
+      id_usuario
+    } = req.body;
 
-    if (!descricao || !valor || !categoria || !tipo || !data_transacao || !id_usuario) {
+    if (
+      !descricao ||
+      valor === undefined ||
+      !categoria ||
+      !tipo ||
+      !data_transacao ||
+      !id_usuario
+    ) {
       return res.status(400).json({
         error: "Por favor preencha todos os campos",
-      }); 
+      });
     }
 
-    const { data: transacaoExistente, erro} = await supabase
-  .from("transacao")
-  .select("*")
-  .eq("descricao", descricao)
-  .eq("valor", valor)
-  .eq("categoria", categoria)
-  .eq("tipo", tipo)
-  .eq("data_transacao", data_transacao)
-  .eq("id_usuario", id_usuario);
+    // normalizar valor
+    let valorNormalizado = valor.toString().trim();
 
-if (erro) {
-  console.error("Erro ao buscar transação:", erro);
-  return res.status(500).json({ error: "Erro ao verificar transação" });
-}
+    if (valorNormalizado.includes(",") && valorNormalizado.includes(".")) {
+      valorNormalizado = valorNormalizado
+        .replace(/\./g, "")
+        .replace(",", ".");
+    } else if (valorNormalizado.includes(",")) {
+      valorNormalizado = valorNormalizado.replace(",", ".");
+    }
 
-if (transacaoExistente && transacaoExistente.length > 0) {
-  return res.status(400).json({ error: "Transação já cadastrada" });
-}
+    const valorNumerico = parseFloat(valorNormalizado);
 
-    const valorcerto = tipo === "Despesa" ? -Math.abs(valor) : Math.abs(valor);
-       
+    if (isNaN(valorNumerico)) {
+      return res.status(400).json({
+        error: "Valor inválido"
+      });
+    }
+
+    const valorcerto =
+      tipo === "Despesa"
+        ? -Math.abs(valorNumerico)
+        : Math.abs(valorNumerico);
+
+    // verificar duplicidade
+    const { data: transacaoExistente, error: erroBusca } = await supabase
+      .from("transacao")
+      .select("*")
+      .eq("descricao", descricao)
+      .eq("valor", valorcerto)
+      .eq("categoria", categoria)
+      .eq("tipo", tipo)
+      .eq("data_transacao", data_transacao)
+      .eq("id_usuario", id_usuario);
+
+    if (erroBusca) {
+      console.error("Erro ao buscar transação:", erroBusca);
+      return res.status(500).json({
+        error: "Erro ao verificar transação"
+      });
+    }
+
+    if (transacaoExistente.length > 0) {
+      return res.status(400).json({
+        error: "Transação já cadastrada"
+      });
+    }
+
     const { data, error } = await supabase
       .from("transacao")
-      .insert([{ descricao, valor: valorcerto, categoria, tipo, data_transacao, id_usuario: req.body.id_usuario }]);
+      .insert([{
+        descricao,
+        valor: valorcerto,
+        categoria,
+        tipo,
+        data_transacao,
+        id_usuario
+      }])
+      .select();
 
     if (error) {
-      console.error("Erro SUpabase:",error);
-      return res.status(500).json({ error: error.message });
+      console.error("Erro Supabase:", error);
+      return res.status(500).json({
+        error: error.message
+      });
     }
 
     return res.status(201).json({
       message: "Transação criada com sucesso",
-      transacao: data,
+      transacao: data[0],
     });
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: "Erro interno no servidor" });
+    return res.status(500).json({
+      error: "Erro interno no servidor"
+    });
   }
 };
 

@@ -75,12 +75,10 @@ const Credesp = ({ atualizarLista, onClose }) => {
             value={form.descricao}
             onChange={handleChange}
           />
-
-          <label>Valor</label>
+            <label>Valor</label>
           <input
             type="text"
             name="valor"
-            inputMode="decimal"
             placeholder="0,00"
             value={form.valor}
             onChange={(e) =>

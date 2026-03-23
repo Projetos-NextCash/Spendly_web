@@ -45,7 +45,7 @@ const Homepag = () => {
   useEffect(() => {
     if (!usuarioId) return;
     buscarTransacoes();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId]);
 
   const abrirEditar = (transacao) => {
@@ -103,20 +103,17 @@ const Homepag = () => {
           <ul>
             {transacoes.map((t) => (
               <li key={t.id}>
-                <strong>{t.descricao}</strong> R$ {t.valor}
-
+                <strong>{t.descricao}</strong> R${" "}
+                {Number(t.valor).toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
                 <p>
                   {t.categoria} | {t.tipo} |{" "}
                   {new Date(t.data_transacao).toLocaleDateString("pt-BR")}
                 </p>
-
-                <button onClick={() => abrirEditar(t)}>
-                  Editar
-                </button>
-
-                <button onClick={() => apagarTransacao(t.id)}>
-                  Excluir
-                </button>
+                <button onClick={() => abrirEditar(t)}>Editar</button>
+                <button onClick={() => apagarTransacao(t.id)}>Excluir</button>
               </li>
             ))}
           </ul>
