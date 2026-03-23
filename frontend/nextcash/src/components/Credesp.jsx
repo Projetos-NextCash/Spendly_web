@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import api from "/service/api";
 
-
-const Credesp = (props) => {
+const Credesp = ({ atualizarLista, onClose }) => {
   const [mostrarNovaCategoria, setMostrarNovaCategoria] = useState(false);
-  
+
   const gerardata = () => {
     return new Date().toISOString().split("T")[0];
   };
-  
+
   const [form, setForm] = useState({
     descricao: "",
     valor: "",
     data_transacao: gerardata(),
     categoria: "",
+    novaCategoria: "",
     tipo: "Despesa",
   });
 
@@ -22,25 +22,26 @@ const Credesp = (props) => {
 
     const id_usuario = localStorage.getItem("usuarioId");
 
-    console.log({
-      descricao: form.descricao,
-      valor: form.valor,
-      data_transacao: form.data_transacao,
-      categoria: form.categoria,
-      tipo: form.tipo,
-    });
+    const categoriaFinal =
+      form.categoria === "outros" ? form.novaCategoria : form.categoria;
+
+    const valorNumerico = Number(
+      form.valor.replace(/\./g, "").replace(",", "."),
+    );
 
     try {
       const res = await api.post("/api/transacao/", {
         descricao: form.descricao,
-        valor: Number(form.valor),
+        valor: valorNumerico,
         data_transacao: form.data_transacao,
-        categoria: form.categoria,
+        categoria: categoriaFinal,
         tipo: form.tipo,
         id_usuario,
       });
 
-      props.atualizarLista();
+      atualizarLista?.();
+      onClose?.();
+
       alert(res.data.mensagem || "Transação cadastrada com sucesso!");
     } catch (err) {
       console.error(err);
@@ -50,88 +51,111 @@ const Credesp = (props) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
 
     if (name === "categoria") {
-    if (value === "outros") {
-      setMostrarNovaCategoria(true);
-      setForm({ ...form, categoria: "" });
-    } else {
-      setMostrarNovaCategoria(false);
+      setMostrarNovaCategoria(value === "outros");
     }
-  }
-  }; 
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <h2>Criando uma nova despesa</h2>
+    <div className="modal-alt">
+      <div className="dados-box">
+        <form onSubmit={handleSubmit}>
+          <h2>Criando nova transação</h2>
 
-        <label htmlFor="descricao">Descrição</label>
-        <input type="text" id="descricao" name="descricao" value={form.descricao} onChange={handleChange} />
-
-        <label htmlFor="valor">Valor</label>
-        <input type="number" id="valor" name="valor" value={form.valor} onChange={handleChange} />
-
-        <label htmlFor="data">Data</label>
-        <input
-          type="date"
-          id="data"
-          name="data_transacao"
-          value={form.data_transacao}
-          onChange={ handleChange}
-        />
-
-        <label htmlFor="categoria">Categoria</label>
-        <select
-          id="categoria"
-          name="categoria"
-          value={form.categoria}
-          onChange={handleChange}
-        >
-          <option value="">Selecione</option>
-          <option value="alimentacao">Alimentação</option>
-          <option value="transporte">Transporte</option>
-          <option value="lazer">Lazer</option>
-          <option value="saude">Saúde</option>
-          <option value="outros">Outros</option>
-        </select>
-
-        {mostrarNovaCategoria && (
-          <>
-            <label htmlFor="novaCategoria">Nova Categoria</label>
-            <input type="text" id="novaCategoria" name="categoria" value={form.categoria} onChange={handleChange}/>
-          </>
-        )}
-
-        <label>Tipo</label>
-
-        <div>
+          <label>Descrição</label>
           <input
-            type="radio"
-            id="tipo"
-            name="tipo"
-            value="Receita"
-            checked={form.tipo === "Receita"}
+            type="text"
+            name="descricao"
+            value={form.descricao}
             onChange={handleChange}
           />
-          <label htmlFor="receita">Receita</label>
-        </div>
 
-        <div>
+          <label>Valor</label>
           <input
-            type="radio"
-            id="tipo"
-            name="tipo"
-            value="Despesa"
-            checked={form.tipo === "Despesa"}
+            type="text"
+            name="valor"
+            inputMode="decimal"
+            placeholder="0,00"
+            value={form.valor}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                valor: e.target.value,
+              }))
+            }
+          />
+
+          <label>Data</label>
+          <input
+            type="date"
+            name="data_transacao"
+            value={form.data_transacao}
             onChange={handleChange}
           />
-          <label htmlFor="despesa">Despesa</label>
-        </div>
 
-        <button type="submit">Adicionar {form.tipo}</button>
-      </form>
+          <label>Categoria</label>
+          <select
+            name="categoria"
+            value={form.categoria}
+            onChange={handleChange}
+          >
+            <option value="">Selecione</option>
+            <option value="alimentacao">Alimentação</option>
+            <option value="transporte">Transporte</option>
+            <option value="lazer">Lazer</option>
+            <option value="saude">Saúde</option>
+            <option value="outros">Outros</option>
+          </select>
+
+          {mostrarNovaCategoria && (
+            <>
+              <label>Nova Categoria</label>
+              <input
+                type="text"
+                name="novaCategoria"
+                value={form.novaCategoria}
+                onChange={handleChange}
+              />
+            </>
+          )}
+
+          <label>Tipo</label>
+
+          <div>
+            <input
+              type="radio"
+              name="tipo"
+              value="Receita"
+              checked={form.tipo === "Receita"}
+              onChange={handleChange}
+            />
+            Receita
+          </div>
+
+          <div>
+            <input
+              type="radio"
+              name="tipo"
+              value="Despesa"
+              checked={form.tipo === "Despesa"}
+              onChange={handleChange}
+            />
+            Despesa
+          </div>
+
+          <button type="submit">Adicionar {form.tipo}</button>
+
+          <button type="button" onClick={onClose}>
+            Fechar
+          </button>
+        </form>
+      </div>
     </div>
   );
 };

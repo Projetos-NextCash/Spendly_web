@@ -97,4 +97,30 @@ const apagarTransacao = async (req, res) => {
   }
 };
 
-module.exports = { criarTransacao, apagarTransacao, listarTransacoes };
+const atualizarTransacao = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { descricao, valor, categoria, tipo, data_transacao } = req.body;
+
+    const valorcerto = tipo === "Despesa" ? -Math.abs(valor) : Math.abs(valor);
+    const { data, error } = await supabase
+      .from("transacao")
+      .update({ descricao, valor: valorcerto, categoria, tipo, data_transacao })
+      .eq("id", id);
+
+    if (error) {
+      console.error("Erro ao atualizar transação:", error);
+      return res.status(500).json({ error: "Erro ao atualizar transação" });
+    }
+
+    return res.status(200).json({
+      message: "Transação atualizada com sucesso",
+      transacao: data,
+    });
+  } catch (error) {
+    console.error("Erro inesperado:", error);
+    return res.status(500).json({ error: "Erro interno no servidor" });
+  }
+};
+
+module.exports = { criarTransacao, apagarTransacao, listarTransacoes, atualizarTransacao };

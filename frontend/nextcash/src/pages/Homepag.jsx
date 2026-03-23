@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "/src/components/Navbar";
 import Despesa from "/src/components/Credesp";
+import EditTransacao from "/src/components/EditTransacao";
 import api from "/service/api";
 
 const Homepag = () => {
@@ -11,6 +12,9 @@ const Homepag = () => {
   const [carregando, setCarregando] = useState(true);
   const [despesas, setDespesas] = useState(false);
 
+  const [editarAberto, setEditarAberto] = useState(false);
+  const [transacaoSelecionada, setTransacaoSelecionada] = useState(null);
+
   const usuarioId = localStorage.getItem("usuarioId");
 
   const [usuario] = useState(() => {
@@ -18,10 +22,19 @@ const Homepag = () => {
     return usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
   });
 
+  const apagarTransacao = async (id) => {
+    try {
+      await api.delete(`/api/transacao/${id}`);
+      buscarTransacoes();
+    } catch (error) {
+      console.error("Erro ao deletar:", error);
+    }
+  };
+
   const buscarTransacoes = async () => {
     try {
       const res = await api.get(`/api/transacao/${usuarioId}`);
-      setTransacoes(res.data.transacoes);
+      setTransacoes(res.data.transacoes || []);
     } catch (error) {
       console.error("Erro ao buscar transações:", error);
     } finally {
@@ -34,6 +47,11 @@ const Homepag = () => {
     buscarTransacoes();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId]);
+
+  const abrirEditar = (transacao) => {
+    setTransacaoSelecionada(transacao);
+    setEditarAberto(true);
+  };
 
   const user = () => {
     if (!usuario) {
@@ -72,13 +90,6 @@ const Homepag = () => {
 
       <div>{user()}</div>
 
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Omnis, non
-        nulla molestiae animi dignissimos ullam magnam in nesciunt
-        exercitationem quaerat sit suscipit saepe tenetur voluptatibus! Alias
-        eligendi distinctio tempore nulla.
-      </p>
-
       <button className="desp-btn" onClick={criarDespesa}>
         Criar despesa
       </button>
@@ -93,10 +104,19 @@ const Homepag = () => {
             {transacoes.map((t) => (
               <li key={t.id}>
                 <strong>{t.descricao}</strong> R$ {t.valor}
+
                 <p>
                   {t.categoria} | {t.tipo} |{" "}
                   {new Date(t.data_transacao).toLocaleDateString("pt-BR")}
                 </p>
+
+                <button onClick={() => abrirEditar(t)}>
+                  Editar
+                </button>
+
+                <button onClick={() => apagarTransacao(t.id)}>
+                  Excluir
+                </button>
               </li>
             ))}
           </ul>
@@ -107,6 +127,14 @@ const Homepag = () => {
         <Despesa
           onClose={() => setDespesas(false)}
           atualizarLista={buscarTransacoes}
+        />
+      )}
+
+      {editarAberto && (
+        <EditTransacao
+          transacao={transacaoSelecionada}
+          onClose={() => setEditarAberto(false)}
+          onAtualizado={buscarTransacoes}
         />
       )}
     </div>
