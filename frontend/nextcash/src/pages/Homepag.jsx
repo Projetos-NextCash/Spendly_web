@@ -9,6 +9,7 @@ const Homepag = () => {
   const navigate = useNavigate();
 
   const [transacoes, setTransacoes] = useState([]);
+  const [saldo, setSaldo] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [despesas, setDespesas] = useState(false);
 
@@ -35,6 +36,7 @@ const Homepag = () => {
     try {
       const res = await api.get(`/api/transacao/${usuarioId}`);
       setTransacoes(res.data.transacoes || []);
+      setSaldo(res.data.saldo || 0);
     } catch (error) {
       console.error("Erro ao buscar transações:", error);
     } finally {
@@ -89,6 +91,14 @@ const Homepag = () => {
       <h1>Bem vindo</h1>
 
       <div>{user()}</div>
+
+      <h2>
+        Saldo: R${" "}
+        {Number(saldo).toLocaleString("pt-BR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </h2>
 
       <button className="desp-btn" onClick={criarDespesa}>
         Criar despesa

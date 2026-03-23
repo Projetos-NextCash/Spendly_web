@@ -116,9 +116,14 @@ const listarTransacoes = async (req, res) => {
       return res.status(500).json({ error: "Erro ao listar transações" });
     }
 
+     const saldo = data.reduce((acc, t) => {
+      return acc + Number(t.valor);
+    }, 0);
+
     return res.status(200).json({
       message: "Transações listadas com sucesso",
       transacoes: data,
+      saldo: saldo
     });
   } catch (error) {
     console.error("Erro inesperado:", error);
