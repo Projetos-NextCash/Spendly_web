@@ -5,6 +5,7 @@ import Login from "./pages/Login"
 import Cadastro from "./pages/Cadastro"
 import Perfil from "/src/pages/Paguser";
 import Recuperar from "/src/pages/Recpass";
+import Transacoes from "./pages/Transacoes";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/cadastro" element={<Cadastro/>} />
         <Route path="/perfil" element={<Perfil/>} />
         <Route path="/recuperar" element={<Recuperar/>} />
+        <Route path="/transacoes" element={<Transacoes />} />
       </Routes>
     </>
   )

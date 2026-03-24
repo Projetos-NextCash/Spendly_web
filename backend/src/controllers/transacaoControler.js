@@ -116,6 +116,7 @@ const listarTransacoes = async (req, res) => {
       return res.status(500).json({ error: "Erro ao listar transações" });
     }
 
+    // Calculo do saldo
      const saldo = data.reduce((acc, t) => {
       return acc + Number(t.valor);
     }, 0);
@@ -158,26 +159,45 @@ const apagarTransacao = async (req, res) => {
 const atualizarTransacao = async (req, res) => {
   try {
     const { id } = req.params;
-    const { descricao, valor, categoria, tipo, data_transacao } = req.body;
+    let { descricao, valor, categoria, tipo, data_transacao } = req.body;
 
-    const valorcerto = tipo === "Despesa" ? -Math.abs(valor) : Math.abs(valor);
-    const { data, error } = await supabase
-      .from("transacao")
-      .update({ descricao, valor: valorcerto, categoria, tipo, data_transacao })
-      .eq("id", id);
+    const updateData = {};
 
-    if (error) {
-      console.error("Erro ao atualizar transação:", error);
-      return res.status(500).json({ error: "Erro ao atualizar transação" });
+    if (descricao !== undefined) updateData.descricao = descricao;
+
+    if (categoria !== undefined) updateData.categoria = categoria;
+
+    if (tipo !== undefined) updateData.tipo = tipo;
+
+    if (data_transacao !== undefined)
+      updateData.data_transacao = data_transacao;
+
+    // trata valor com tipo
+    if (valor !== undefined) {
+      const valorFinal =
+        tipo === "despesa"
+          ? -Math.abs(valor)
+          : Math.abs(valor);
+
+      updateData.valor = valorFinal;
     }
 
-    return res.status(200).json({
-      message: "Transação atualizada com sucesso",
-      transacao: data,
+    const { data, error } = await supabase
+      .from("transacao")
+      .update(updateData)
+      .eq("id", id)
+      .select();
+
+    if (error) throw error;
+
+    res.json({
+      mensagem: "Transação atualizada",
+      transacao: data[0],
     });
+
   } catch (error) {
-    console.error("Erro inesperado:", error);
-    return res.status(500).json({ error: "Erro interno no servidor" });
+    console.error(error);
+    res.status(500).json({ erro: error.message });
   }
 };
 

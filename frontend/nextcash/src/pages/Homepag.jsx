@@ -4,6 +4,7 @@ import Navbar from "/src/components/Navbar";
 import Despesa from "/src/components/Credesp";
 import EditTransacao from "/src/components/EditTransacao";
 import api from "/service/api";
+import Transacoes from "./Transacoes";
 
 const Homepag = () => {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ const Homepag = () => {
   const buscarTransacoes = async () => {
     try {
       const res = await api.get(`/api/transacao/${usuarioId}`);
+
       setTransacoes(res.data.transacoes || []);
       setSaldo(res.data.saldo || 0);
     } catch (error) {
@@ -43,6 +45,10 @@ const Homepag = () => {
       setCarregando(false);
     }
   };
+
+  const transacoesRecentes = [...transacoes]
+  .reverse()
+  .slice(0, 5);
 
   useEffect(() => {
     if (!usuarioId) return;
@@ -105,13 +111,13 @@ const Homepag = () => {
       </button>
 
       <div>
-        <h2>Minhas Transações</h2>
+        <h2>Minhas Transações <a href="/transacoes">ver todas</a></h2>
 
-        {transacoes.length === 0 ? (
+        {transacoesRecentes.length === 0 ? (
           <p>Nenhuma transação encontrada.</p>
         ) : (
           <ul>
-            {transacoes.map((t) => (
+            {transacoesRecentes.map((t) => (
               <li key={t.id}>
                 <strong>{t.descricao}</strong> R${" "}
                 {Number(t.valor).toLocaleString("pt-BR", {
