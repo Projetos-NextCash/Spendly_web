@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "/src/components/Navbar";
 import Despesa from "/src/components/Credesp";
 import EditTransacao from "/src/components/EditTransacao";
+import CriarObjetivo from "/src/components/CriarObjetivo";
+import CardObjetivo from "/src/components/CardObjetivo";
 import api from "/service/api";
 import Transacoes from "./Transacoes";
 
@@ -13,6 +15,8 @@ const Homepag = () => {
   const [saldo, setSaldo] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [despesas, setDespesas] = useState(false);
+  const [objetivos, setObjetivos] = useState([]);
+  const [objetivoModal, setObjetivoModal] = useState(false);
 
   const [editarAberto, setEditarAberto] = useState(false);
   const [transacaoSelecionada, setTransacaoSelecionada] = useState(null);
@@ -46,6 +50,18 @@ const Homepag = () => {
     }
   };
 
+  const buscarObjetivos = async () => {
+    try {
+      const res = await api.get(`/api/objFinan/${usuarioId}`);
+      const objetivosAtivos = (res.data.objetivos || []).filter(
+        (obj) => obj.status === "ativo"
+      );
+      setObjetivos(objetivosAtivos.slice(0, 3)); // Mostrar apenas 3 primeiros
+    } catch (error) {
+      console.error("Erro ao buscar objetivos:", error);
+    }
+  };
+
   const transacoesRecentes = [...transacoes]
   .reverse()
   .slice(0, 5);
@@ -53,6 +69,7 @@ const Homepag = () => {
   useEffect(() => {
     if (!usuarioId) return;
     buscarTransacoes();
+    buscarObjetivos();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usuarioId]);
 
@@ -86,6 +103,21 @@ const Homepag = () => {
     setDespesas(true);
   };
 
+  const deletarObjetivo = async (id) => {
+    if (window.confirm("Tem certeza que deseja deletar este objetivo?")) {
+      try {
+        await api.delete(`/api/objFinan/${id}`);
+        buscarObjetivos();
+      } catch (error) {
+        console.error("Erro ao deletar objetivo:", error);
+      }
+    }
+  };
+
+  const abrirEditarObjetivo = (objetivo) => {
+    // Implementar edição de objetivo se necessário
+  };
+
   if (carregando) {
     return <p>Carregando transações...</p>;
   }
@@ -107,7 +139,7 @@ const Homepag = () => {
       </h2>
 
       <button className="desp-btn" onClick={criarDespesa}>
-        Criar despesa
+        Inserir movimentação de dinheiro
       </button>
 
       <div>
@@ -136,6 +168,29 @@ const Homepag = () => {
         )}
       </div>
 
+      <div>
+        <h2>Meus Objetivos Financeiros <a href="/objetivos">ver todos</a></h2>
+
+        {objetivos.length === 0 ? (
+          <p>Nenhum objetivo financeiro criado.</p>
+        ) : (
+          <div className="objetivos-preview">
+            {objetivos.map((objetivo) => (
+              <CardObjetivo
+                key={objetivo.id}
+                objetivo={objetivo}
+                onEditar={abrirEditarObjetivo}
+                onDeletar={deletarObjetivo}
+              />
+            ))}
+          </div>
+        )}
+
+        <button className="desp-btn" onClick={() => setObjetivoModal(true)}>
+          Criar novo objetivo
+        </button>
+      </div>
+
       {despesas && (
         <Despesa
           onClose={() => setDespesas(false)}
@@ -148,6 +203,13 @@ const Homepag = () => {
           transacao={transacaoSelecionada}
           onClose={() => setEditarAberto(false)}
           onAtualizado={buscarTransacoes}
+        />
+      )}
+
+      {objetivoModal && (
+        <CriarObjetivo
+          onClose={() => setObjetivoModal(false)}
+          atualizarLista={buscarObjetivos}
         />
       )}
     </div>
